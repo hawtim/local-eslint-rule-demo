@@ -10,7 +10,13 @@ module.exports = {
         if (node.body.body.length === 0) {
           context.report({ node: node.body, messageId: 'emptyCatch' });
         }
-      }
+      },
+      // or
+      // TryStatement(node) {
+      //   if (node.handler && node.handler.body.body.length === 0) {
+      //     context.report({ node: node.handler.body, messageId: 'emptyCatch' });
+      //   }
+      // }
     }
   }
 }

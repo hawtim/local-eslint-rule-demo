@@ -27,7 +27,3 @@ yarn lint
 ### Customize configuration
 
 See [Configuration Reference](https://cli.vuejs.org/config/).
-
-### Further Reading
-
-[how-to-write-custom-eslint-rules](https://developers.mews.com/how-to-write-custom-eslint-rules/)
