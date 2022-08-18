@@ -25,8 +25,10 @@ Looks quite simple, let's check it step by step.
 
 ## Integrated eslint-plugin-local-rules
 
+First, we need to install the `eslint-plugin-local-rules` package. The package allows you to create local ESlLint rules for your project and debug easily.
+
 ```bash
-npm install eslint-plugin-local-rules
+yarn add eslint-plugin-local-rules --save-dev
 ```
 
 ## Create your custom rules
