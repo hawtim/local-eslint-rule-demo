@@ -4,9 +4,13 @@
 
 Recently we do some refactoring about our system, and we found that we need to control the store dispatch direction, which is right from the sub-application to the main application.
 
-And therefore, dispatching an action from the main application to the sub-application is not allowed because this will couple the applications. After we discussed this problem, we found that one way to do this is to implement lexical analysis to check the dispatch/commit direction and give a warning to our system's developers.
+And therefore, dispatching an action from the main application to the sub-application is not allowed because this will couple the applications.
 
-As you may notice, we need to implement lexical analysis and we found ESLint is a great tool to do this. So today's topic is how to create a custom ESLint rule. I'll walk you through writing a rule step by step so that you can create your own rules.
+After we discussed this problem, we found that one way to do this is to implement lexical analysis to check the dispatch/commit direction and give an error to our system's developers.
+
+We found that ESLint is a great tool to achieve this. So our topic today is about how to create a custom ESLint rule.
+
+I'll walk you through writing a rule step by step so that you can create your own rules.
 
 ## Get Started
 
@@ -14,7 +18,7 @@ For writing custom ESLint rules for your project, you will need to do the follow
 
 1. Integrated [eslint-plugin-local-rules](https://github.com/cletusw/eslint-plugin-local-rules)
 2. Create your custom rules
-3. Update ESLint configuration
+3. Update configurations
 4. Run Command: `eslint --ext .js,.vue ./src` to check your code
 
 Looks quite simple, let's check it step by step.
@@ -56,7 +60,7 @@ module.exports = {
 
 ```
 
-### Export them in `eslint-local-rules/index.js` file
+### Import the rule into the `eslint-local-rules/index.js` file
 
 ```js
 // /eslint-local-rules/index.js
@@ -84,19 +88,15 @@ module.exports = {
 }
 ```
 
-Okay, now you may have a question, how do you know you need to use `node.body.body.length` to decide whether the catch block is empty or not?
+Okay, now you may have a question, how do I know that I need to use `node.body.body.length` to decide whether the catch block is empty or not?
 
 The answer is that you need to read the [AST](https://eslint.org/docs/developer-guide/working-with-rules#working-with-the-ast) of the code.
 
-AST is a tree representation of the source code that tells us about the code structure.
-
-Tools like ESLint create AST for a given piece of code and execute rules on it.
+AST is a tree representation of the source code that tells us about the code structure. And tools like ESLint will parser a given piece of code to AST and execute rules on it.
 
 To figure out specific instructions for our custom rule, we need to inspect AST manually.
 
-You can use [AST explorer](https://astexplorer.net/) to check the AST of your code.
-
-Let's check the AST of the following code:
+You can use [AST explorer](https://astexplorer.net/) to check the AST of your code. Let's check the AST of the following code:
 
 ```js
 try {
@@ -105,25 +105,17 @@ try {
 } catch (error) {}
 ```
 
-If we leave the catch block empty, it will silently swallow an error, and such an error is very hard to trace.
+In this case, if we leave the catch block empty, it will silently swallow an error, and such an error is very hard to trace.
 
 Let's have a look at the AST of the above code: [Link](https://astexplorer.net/#/gist/f8a2a6445e2609c812d6fa41ae34caf4/7c0629c34fcf198a08714d26fbb5d6f4800a9c5a)
 
 ![ast_explorer_demo.png](screenshots/ast_explorer_demo.png)
 
-We could start from the top-level `Program` node and navigate downwards but the chain is too long. we can start at the node `CatchClause`
+As you can see, the tree has a root called Program.
 
-you can also start at the node `TryStatement`
+We could traverse the tree starting from the top-level `Program` node to find the specific node we want.
 
-```js
-TryStatement(node) {
-  if (node.handler && node.handler.body.body.length === 0) {
-    context.report({ node: node.handler.body, messageId: 'emptyCatch' });
-  }
-}
-```
-
-But it’s better to choose something closer to our target node, just like `CatchClause`.
+But starting from the root the traverse performance could be low, we can start at the closest node, `CatchClause`
 
 Then we run `yarn lint`, it will give us an error message:
 
