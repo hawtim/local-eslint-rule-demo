@@ -135,7 +135,7 @@ error: Empty catch block is not allowed (local-rules/disallow-empty-catch) at sr
 
 ## Vuex Case
 
-let's take another look at the case we mentioned at the background part.
+let's take another look at the case we mentioned in the background part.
 
 We want some `vuex` modules that can only be dispatched from the sub-application to the main application. Following the statement above, we can write a custom rule like this:
 
@@ -185,6 +185,8 @@ module.exports = {
 };
 ```
 
+And then you run `yarn lint` again, the error messages will be:
+
 ```bash
 error: mapGetters: not allowed to use aModule (local-rules/disallow-some-module) at src/App.vue:13:19:
   11 |   name: 'App',
@@ -206,11 +208,18 @@ error: mapActions: not allowed to use aModule (local-rules/disallow-some-module)
   23 |   },
 ```
 
+It works! And we can also detect the specific program patterns to provide powerful constraints.
+
+For example:
+
+```js
+this.$store.commit('aModule/commitAModule');
+this.$store.dispatch('aModule/dispatchAModule');
+```
+
 ## Conclusion
 
-In this article, we have learned how to write custom ESLint rules for our project.
-
-We have also learned how to use AST to write custom rules.
+In this article, we have learned how to use AST explorer to help and finally write a custom ESLint rule for our scenarios.
 
 ESLint shows us a solution to handle some scenarios:
 
